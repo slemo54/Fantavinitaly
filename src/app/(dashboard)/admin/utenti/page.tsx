@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { UserPlus, UserMinus, Shield, User, Save, X, RefreshCw, Search, MoreVertical, Coins, Mail, UserCheck, TrendingUp, TrendingDown } from 'lucide-react'
+import { UserPlus, UserMinus, Shield, User, Save, X, RefreshCw, Search, MoreVertical, Coins, Mail, UserCheck, TrendingUp, TrendingDown, Trash2 } from 'lucide-react'
 
 export default function UsersAdminPage() {
     const [profiles, setProfiles] = useState<any[]>([])
@@ -44,6 +44,19 @@ export default function UsersAdminPage() {
 
         if (!error) {
             setProfiles(profiles.map(p => p.id === userId ? { ...p, role: newRole } : p))
+        }
+    }
+
+    const handleDeleteUser = async (userId: string, name: string) => {
+        if (!confirm(`Sei sicuro di voler rimuovere ${name}? Questa azione è irreversibile.`)) return
+
+        const { error } = await supabase
+            .from('profiles')
+            .delete()
+            .eq('id', userId)
+
+        if (!error) {
+            setProfiles(profiles.filter(p => p.id !== userId))
         }
     }
 
@@ -167,6 +180,13 @@ export default function UsersAdminPage() {
                                     title={p.role === 'admin' ? 'Declassa a Utente' : 'Promuovi ad Admin'}
                                 >
                                     {p.role === 'admin' ? <UserMinus size={18} /> : <UserCheck size={18} />}
+                                </button>
+                                <button
+                                    className="role-btn delete"
+                                    onClick={() => handleDeleteUser(p.id, p.display_name)}
+                                    title="Rimuovi Collega"
+                                >
+                                    <Trash2 size={18} />
                                 </button>
                             </div>
                         </div>
@@ -310,9 +330,11 @@ export default function UsersAdminPage() {
                     justify-content: center;
                     color: var(--gray-400);
                     background: var(--bg);
-                    transition: all 0.2s;
+                    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
                 }
-                .role-btn:hover { background: var(--navy); color: white; transform: rotate(15deg); }
+                .role-btn:hover { background: var(--navy); color: white; transform: rotate(8deg) scale(1.1); }
+                .role-btn.delete { color: var(--accent); }
+                .role-btn.delete:hover { background: #fee2e2; color: #ef4444; }
 
                 .animate-in { animation: slideUp 0.3s ease-out both; }
                 @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }

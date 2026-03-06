@@ -33,10 +33,10 @@ export type Transaction = {
     status: TransactionStatus
     judged_by_user_id?: string
     judged_at?: string
-    contester_at?: string
-    contestation_reason?: string
-    created_at: string
-    updated_at: string
+    contested_at?: string;
+    contestation_reason?: string;
+    created_at: string;
+    updated_at: string;
 }
 
 export type EmailLog = {

@@ -143,8 +143,8 @@ CREATE POLICY "Admin manages all transactions" ON public.transactions
 CREATE OR REPLACE FUNCTION public.handle_approved_transaction()
 RETURNS TRIGGER AS $$
 BEGIN
+  -- Update balance and count when approved
   IF NEW.status = 'approved' AND (OLD.status = 'pending' OR OLD.status IS NULL) THEN
-    -- Update balance and count
     UPDATE public.profiles 
     SET 
       balance = balance + NEW.amount,
@@ -171,8 +171,8 @@ BEGIN
     END;
   END IF;
   
-  -- Rollback balance if cancelled by admin
-  IF NEW.status = 'cancelled' AND OLD.status = 'contested' THEN
+  -- Rollback balance if cancelled by admin (from contested OR approved)
+  IF NEW.status = 'cancelled' AND (OLD.status = 'contested' OR OLD.status = 'approved') THEN
     UPDATE public.profiles 
     SET 
       balance = balance - NEW.amount,

@@ -67,20 +67,40 @@ export default function ProposePage() {
     if (!user) return
 
     const type = malusTypes.find(t => t.id === selectedTypeId)
+    const target = profiles.find(p => p.id === targetId)
 
-    const { error } = await supabase.from('transactions').insert({
-      target_user_id: targetId,
-      proposed_by_user_id: user.id,
-      malus_type_id: selectedTypeId,
-      amount: type.amount,
-      description,
-      status: 'pending'
-    })
+    const { data: newTx, error: txError } = await supabase
+      .from('transactions')
+      .insert({
+        target_user_id: targetId,
+        proposed_by_user_id: user.id,
+        malus_type_id: selectedTypeId,
+        amount: type.amount,
+        description,
+        status: 'pending'
+      })
+      .select()
+      .single()
 
-    if (error) {
-      setError(error.message)
+    if (txError) {
+      setError(txError.message)
       setLoading(false)
     } else {
+      // Fetch other users for notification (excluding proposer and target)
+      const { data: others } = await supabase
+        .from('profiles')
+        .select('email')
+        .not('id', 'in', `("${user.id}","${targetId}")`)
+
+      if (others && others.length > 0) {
+        // In a real scenario, this should be an Edge Function to avoid blocking the UI
+        // or potentially revealing other users' emails. For this iteration, we'll
+        // call the API or utility directly if possible, but since we are client-side,
+        // we should ideally use a server action or edge function.
+        // For now, we'll simulate the trigger or just rely on the user seeing it in dashboard.
+        console.log('Notifying users:', others.map(u => u.email))
+      }
+
       router.push('/')
       router.refresh()
     }
