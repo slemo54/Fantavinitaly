@@ -95,7 +95,7 @@ button {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: url('/vinitaly_bg.png') center/cover no-repeat;
+  background: radial-gradient(circle at top left, var(--primary-light) 0%, var(--navy) 100%);
   padding: 1.5rem;
 }
 
